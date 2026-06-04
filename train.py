@@ -70,8 +70,8 @@ class Trainer():
             for data, _ in loader:
                 data = data.to(self.device)
                 output = model(data)
-                prediction = torch.argmax(output, dim=1)
-                labels.append(prediction.cpu())
+                prediction = output.argmax(1)
+                labels.append(prediction)
         
         return torch.cat(labels)
                 
@@ -91,8 +91,8 @@ class Trainer():
             elif epoch >= starting_epoch + 10:
                 train_data.transform =   transformer.get_transforms(resize=288, magnitude=12)
 
-            train_loss, train_acc = trainer.run_one_epoch(loader=train_loader, model=model, epoch=epoch)
-            val_loss, val_acc = trainer.validate(loader=val_loader, model=model)
+            train_loss, train_acc = self.run_one_epoch(loader=train_loader, model=model, epoch=epoch)
+            val_loss, val_acc = self.validate(loader=val_loader, model=model)
 
             results.append(
                 {
@@ -109,14 +109,14 @@ class Trainer():
                 no_improvement = 0
                 best_val_acc = val_acc
                 best_epoch = epoch
-                torch.save({'model_state_dict':model.state_dict(), 'optim_state_dict':trainer.optimizer.state_dict(), 'scheduler_state_dict':trainer.scheduler.state_dict(), 'epoch':epoch}, ckpt_path + "fold" + str(fold))
+                torch.save({'model_state_dict':model.state_dict(), 'optim_state_dict':self.optimizer.state_dict(), 'scheduler_state_dict':self.scheduler.state_dict(), 'epoch':epoch}, ckpt_path + "fold" + str(fold))
             else:
                 no_improvement += 1
                 if no_improvement > 4:
                     print("Early stopping")
                     break
 
-            trainer.scheduler.step()
+            self.scheduler.step()
             torch.cuda.empty_cache()
 
         with open(csv_path + "fold" + str(fold) + ".csv", "w") as f:
@@ -137,7 +137,7 @@ class Trainer():
         for param in model.base_model.features.parameters():
             param.require_gradient=True
         # update optimizer with new parameters
-        trainer.optimizer.add_param_group({'params': model.base_model.features.parameters(), 'lr': 0.001})
+        self.optimizer.add_param_group({'params': model.base_model.features.parameters(), 'lr': 0.001})
 
         # Update transforms for dataset:
         train_data.transform =  transformer.get_transforms(resize=384, magnitude=14)
@@ -147,8 +147,8 @@ class Trainer():
         # frozen_params = list(filter(lambda p: not p.requires_grad, model.parameters()))
         for epoch in range(starting_epoch, starting_epoch + num_epochs):
 
-            train_loss, train_acc = trainer.run_one_epoch(loader=train_loader, model=model, epoch=epoch)
-            val_loss, val_acc = trainer.validate(loader=val_loader,model=model)
+            train_loss, train_acc = self.run_one_epoch(loader=train_loader, model=model, epoch=epoch)
+            val_loss, val_acc = self.validate(loader=val_loader,model=model)
 
             results.append(
                 {
