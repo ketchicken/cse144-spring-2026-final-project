@@ -5,7 +5,6 @@ import torch
 from torch.utils.data import Dataset, DataLoader, random_split, Subset
 import csv
 from load_data import TransformsAugments
-from load_data import cutmix_or_mixup
 
 class Trainer():
     def __init__(self, optimizer, criterion, scheduler, device, batchsize, numworkers):
