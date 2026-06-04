@@ -124,7 +124,7 @@ class Trainer():
             writer.writeheader()
             writer.writerows(results)
 
-        return best_val_acc
+        return best_epoch, best_val_acc
 
     # Fine tune loop
     def fine_tuning(self, model, num_epochs, ckpt_path, csv_path, train_data, train_loader, val_loader, last_acc, trainer, transformer, starting_epoch=0, learning_rate=0.0001):
