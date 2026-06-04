@@ -7,10 +7,11 @@ import csv
 from load_data import TransformsAugments
 
 class Trainer():
-    def __init__(self, optimizer, criterion, scheduler, device, batchsize, numworkers):
+    def __init__(self, optimizer, criterion, scheduler, transformer, device, batchsize, numworkers):
         self.optimizer=optimizer
         self.criterion=criterion
         self.scheduler=scheduler
+        self.transformer = transformer
         self.device=device
         self.batch_size = batchsize
         self.num_workers = numworkers
@@ -35,7 +36,7 @@ class Trainer():
         for data, label in loader:
             # Applying Cutmix/Mixup 50% of the time
             if torch.rand(1).item() > 0.7:
-                data, label = cutmix_or_mixup(data, label)
+                data, label = self.transformer.cutmix_or_mixup(data, label)
 
             # Train loop
             data, label = data.to(self.device), label.to(self.device)
