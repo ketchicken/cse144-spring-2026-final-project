@@ -50,19 +50,25 @@ class NumericImageFolder(datasets.ImageFolder):
         classes = list(custom_mapping.keys())
 
         return classes, custom_mapping
+    
+class TransformsAugments():
+    def __init__(self, mix_factor):
+        cutmix = tfv2.CutMix(alpha=mix_factor, num_classes=100)
+        mixup = tfv2.MixUp(alpha=mix_factor, num_classes=100)
+        self.cutmix_or_mixup = tfv2.RandomChoice([cutmix, mixup])
 
-def get_transforms(resize, magnitude, color_jitter_factor=0.2, degrees_rotation=15, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
-    return tfv2.Compose([
-                # Augmentations
-                tfv2.RandAugment(num_ops=2, magnitude=magnitude, interpolation=tfv2.InterpolationMode.BILINEAR), # random augmentation
-                tfv2.RandomHorizontalFlip(),        # Flip Horizontal
-                tfv2.ColorJitter(brightness=color_jitter_factor, contrast=color_jitter_factor), # adjust brightness and contrast
+    def get_transforms(self, resize, magnitude, color_jitter_factor=0.2, degrees_rotation=15, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
+        return tfv2.Compose([
+                    # Augmentations
+                    tfv2.RandAugment(num_ops=2, magnitude=magnitude, interpolation=tfv2.InterpolationMode.BILINEAR), # random augmentation
+                    tfv2.RandomHorizontalFlip(),        # Flip Horizontal
+                    tfv2.ColorJitter(brightness=color_jitter_factor, contrast=color_jitter_factor), # adjust brightness and contrast
 
-                # Normalization
-                tfv2.Resize((resize,resize), interpolation=tfv2.InterpolationMode.BILINEAR),
-                tfv2.CenterCrop((resize,resize)),
-                tfv2.ToImage(),
-                tfv2.ToDtype(torch.float32, scale=True),
-                tfv2.Normalize(mean, std)
-            ])
+                    # Normalization
+                    tfv2.Resize((resize,resize), interpolation=tfv2.InterpolationMode.BILINEAR),
+                    tfv2.CenterCrop((resize,resize)),
+                    tfv2.ToImage(),
+                    tfv2.ToDtype(torch.float32, scale=True),
+                    tfv2.Normalize(mean, std)
+                ])
 
