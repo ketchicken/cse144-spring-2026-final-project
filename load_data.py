@@ -62,7 +62,9 @@ class TransformsAugments():
                     # Augmentations
                     tfv2.RandAugment(num_ops=2, magnitude=magnitude, interpolation=tfv2.InterpolationMode.BILINEAR), # random augmentation
                     tfv2.RandomHorizontalFlip(),        # Flip Horizontal
-                    tfv2.ColorJitter(brightness=color_jitter_factor, contrast=color_jitter_factor), # adjust brightness and contrast
+                    #tfv2.RandomErasing(), 
+                    #tfv2.RandomRotation(15), # 15 degree rotation
+                    #tfv2.ColorJitter(brightness=color_jitter_factor, contrast=color_jitter_factor), # adjust brightness and contrast
 
                     # Normalization
                     tfv2.Resize((resize,resize), interpolation=tfv2.InterpolationMode.BILINEAR),

@@ -63,19 +63,6 @@ class Trainer():
         acc = self.accuracy(loader, model)
         return total_loss / len(loader), acc
 
-    def generate_labels(self, loader, model):
-        model.eval()
-        labels = []
-        with torch.no_grad():
-            for data, _ in loader:
-                data = data.to(self.device)
-                output = model(data)
-                prediction = output.argmax(1)
-                labels.append(prediction)
-        
-        return torch.cat(labels)
-                
-
     # Training Functions
     def one_fold(self, fold, model, num_epochs, ckpt_path, csv_path, train_data, train_loader, val_loader, trainer, transformer, starting_epoch=0):
         results = []
@@ -85,11 +72,13 @@ class Trainer():
 
         for epoch in range(starting_epoch, starting_epoch + num_epochs):
 
-            if epoch >= starting_epoch + 5:
-                train_data.transform =  transformer.get_transforms(resize=224, magnitude=9)
+            if epoch >= starting_epoch + 3:
+                train_data.transform =  transformer.get_transforms(resize=224, magnitude=5)
                 train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+            elif epoch >= starting_epoch + 5:
+                train_data.transform =   transformer.get_transforms(resize=288, magnitude=9)
             elif epoch >= starting_epoch + 10:
-                train_data.transform =   transformer.get_transforms(resize=288, magnitude=12)
+                train_data.transform = transformer.get_transforms(resize=384, magnitude=12)
 
             train_loss, train_acc = self.run_one_epoch(loader=train_loader, model=model, epoch=epoch)
             val_loss, val_acc = self.validate(loader=val_loader, model=model)
@@ -112,11 +101,11 @@ class Trainer():
                 torch.save({'model_state_dict':model.state_dict(), 'optim_state_dict':self.optimizer.state_dict(), 'scheduler_state_dict':self.scheduler.state_dict(), 'epoch':epoch}, ckpt_path + "fold" + str(fold))
             else:
                 no_improvement += 1
-                if no_improvement > 4:
+                if no_improvement > 5:
                     print("Early stopping")
                     break
 
-            self.scheduler.step()
+            self.scheduler.step(val_loss)
             torch.cuda.empty_cache()
 
         with open(csv_path + "fold" + str(fold) + ".csv", "w") as f:
@@ -137,7 +126,7 @@ class Trainer():
         for param in model.base_model.features.parameters():
             param.require_gradient=True
         # update optimizer with new parameters
-        self.optimizer.add_param_group({'params': model.base_model.features.parameters(), 'lr': 0.001})
+        self.optimizer.add_param_group({'params': model.base_model.features.parameters(), 'lr': learning_rate})
 
         # Update transforms for dataset:
         train_data.transform =  transformer.get_transforms(resize=384, magnitude=14)
@@ -171,7 +160,8 @@ class Trainer():
                 if no_improvement > 7:
                     print("Early stopping")
                     break
-
+            
+            self.scheduler.step(val_loss)
             torch.cuda.empty_cache()
 
         with open(csv_path + "finetuned.csv", "w") as f:
