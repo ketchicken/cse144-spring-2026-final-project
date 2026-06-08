@@ -2,7 +2,7 @@
 import csv
 import torch
 
-def test_model(loader, model1, model2, device, outfile='submission.csv'):
+def test_model(loader, model, device, outfile='submission.csv'):
     with open(outfile, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['ID', 'Label']) # HEADER
@@ -10,9 +10,7 @@ def test_model(loader, model1, model2, device, outfile='submission.csv'):
             for input, id in loader:
                 input = input.to(device)
                 id = id[0]
-                output1 = torch.softmax(model1(input))
-                output2 = torch.softmax(model2(input))
-                avg_prediction = 0.5 * torch.argmax(output1+output2, dim=1).item()
-                writer.writerow([id, avg_prediction])
+                prediction = 0.5 * torch.argmax(model(input), dim=1).item()
+                writer.writerow([id, prediction])
 
 print("Completed")
