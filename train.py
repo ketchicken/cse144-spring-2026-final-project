@@ -72,13 +72,10 @@ class Trainer():
 
         for epoch in range(starting_epoch, starting_epoch + num_epochs):
 
-            if epoch >= starting_epoch + 3:
-                train_data.transform =  transformer.get_transforms(resize=224, magnitude=5)
-                train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
-            elif epoch >= starting_epoch + 5:
-                train_data.transform =   transformer.get_transforms(resize=288, magnitude=9)
-            if epoch >= starting_epoch + 7:
-                train_data.transform = transformer.get_transforms(resize=384, magnitude=12)
+            if epoch >= starting_epoch + 5:
+                train_data.transform =   transformer.get_transforms(resize=480, magnitude=9)
+            if epoch >= starting_epoch + 10:
+                train_data.transform = transformer.get_transforms(resize=480, magnitude=12)
 
             train_loss, train_acc = self.run_one_epoch(loader=train_loader, model=model, epoch=epoch)
             val_loss, val_acc = self.validate(loader=val_loader, model=model)
