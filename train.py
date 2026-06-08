@@ -72,13 +72,13 @@ class Trainer():
 
         for epoch in range(starting_epoch, starting_epoch + num_epochs):
 
-            # if epoch >= starting_epoch + 3:
-            #     train_data.transform =  transformer.get_transforms(resize=224, magnitude=5)
-            #     train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
-            # elif epoch >= starting_epoch + 5:
-            #     train_data.transform =   transformer.get_transforms(resize=288, magnitude=9)
-            if epoch >= starting_epoch + 5:
-                train_data.transform = transformer.get_transforms(resize=384, magnitude=7)
+            if epoch >= starting_epoch + 3:
+                train_data.transform =  transformer.get_transforms(resize=224, magnitude=5)
+                train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+            elif epoch >= starting_epoch + 5:
+                train_data.transform =   transformer.get_transforms(resize=288, magnitude=9)
+            if epoch >= starting_epoch + 7:
+                train_data.transform = transformer.get_transforms(resize=384, magnitude=12)
 
             train_loss, train_acc = self.run_one_epoch(loader=train_loader, model=model, epoch=epoch)
             val_loss, val_acc = self.validate(loader=val_loader, model=model)
@@ -120,7 +120,6 @@ class Trainer():
         # unfreezing layers for finetuning
         results = []
         best_val_acc = last_acc
-        best_epoch = starting_epoch
         no_improvement = 0
         # Unfreeze entire feature extraction
         for param in model.base_model.features.parameters():
@@ -129,11 +128,9 @@ class Trainer():
         self.optimizer.add_param_group({'params': model.base_model.features.parameters(), 'lr': learning_rate})
 
         # Update transforms for dataset:
-        train_data.transform =  transformer.get_transforms(resize=384, magnitude=9)
+        train_data.transform =  transformer.get_transforms(resize=384, magnitude=12)
         train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
 
-        # Unfreeze a few layers at a time
-        # frozen_params = list(filter(lambda p: not p.requires_grad, model.parameters()))
         for epoch in range(starting_epoch, starting_epoch + num_epochs):
 
             train_loss, train_acc = self.run_one_epoch(loader=train_loader, model=model, epoch=epoch)

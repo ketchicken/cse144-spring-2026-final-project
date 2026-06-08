@@ -14,3 +14,15 @@ def test_model(loader, model, device, outfile='submission.csv'):
                 writer.writerow([id, prediction])
 
 print("Completed")
+
+def remap_values(file, corrected_file, idx_to_class):
+
+    with open(corrected_file, 'w', newline='') as out_f, open(file, 'r') as in_f:
+        reader = csv.reader(in_f)
+        writer = csv.writer(out_f)
+
+        writer.writerow(['ID', 'Label']) # header
+
+        all_rows = list(reader)
+        for row in all_rows[1:]: # skip the header
+            row[0], row[1] = row[0], idx_to_class[row[1]]
