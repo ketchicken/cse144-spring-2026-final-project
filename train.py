@@ -34,8 +34,8 @@ class Trainer():
         total_loss = 0.0
 
         for data, label in loader:
-            # Applying Cutmix/Mixup 50% of the time
-            if torch.rand(1).item() > 0.7:
+            # Applying Cutmix/Mixup 90% of the time
+            if torch.rand(1).item() > 0.9:
                 data, label = self.transformer.cutmix_or_mixup(data, label)
 
             # Train loop
@@ -72,13 +72,13 @@ class Trainer():
 
         for epoch in range(starting_epoch, starting_epoch + num_epochs):
 
-            if epoch >= starting_epoch + 3:
-                train_data.transform =  transformer.get_transforms(resize=224, magnitude=5)
-                train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
-            elif epoch >= starting_epoch + 5:
-                train_data.transform =   transformer.get_transforms(resize=288, magnitude=9)
-            elif epoch >= starting_epoch + 10:
-                train_data.transform = transformer.get_transforms(resize=384, magnitude=12)
+            # if epoch >= starting_epoch + 3:
+            #     train_data.transform =  transformer.get_transforms(resize=224, magnitude=5)
+            #     train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+            # elif epoch >= starting_epoch + 5:
+            #     train_data.transform =   transformer.get_transforms(resize=288, magnitude=9)
+            if epoch >= starting_epoch + 5:
+                train_data.transform = transformer.get_transforms(resize=384, magnitude=7)
 
             train_loss, train_acc = self.run_one_epoch(loader=train_loader, model=model, epoch=epoch)
             val_loss, val_acc = self.validate(loader=val_loader, model=model)
@@ -101,7 +101,7 @@ class Trainer():
                 torch.save({'model_state_dict':model.state_dict(), 'optim_state_dict':self.optimizer.state_dict(), 'scheduler_state_dict':self.scheduler.state_dict(), 'epoch':epoch}, ckpt_path + "fold" + str(fold))
             else:
                 no_improvement += 1
-                if no_improvement > 5:
+                if no_improvement > 7:
                     print("Early stopping")
                     break
 
@@ -129,7 +129,7 @@ class Trainer():
         self.optimizer.add_param_group({'params': model.base_model.features.parameters(), 'lr': learning_rate})
 
         # Update transforms for dataset:
-        train_data.transform =  transformer.get_transforms(resize=384, magnitude=14)
+        train_data.transform =  transformer.get_transforms(resize=384, magnitude=9)
         train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
 
         # Unfreeze a few layers at a time
@@ -153,7 +153,6 @@ class Trainer():
             if best_val_acc < val_acc:
                 no_improvement = 0
                 best_val_acc = val_acc
-                best_epoch = epoch
                 torch.save({'model_state_dict':model.state_dict(), 'epoch':epoch}, ckpt_path + "finetuned")
             else:
                 no_improvement += 1
