@@ -26,3 +26,4 @@ def remap_values(file, corrected_file, idx_to_class):
         all_rows = list(reader)
         for row in all_rows[1:]: # skip the header
             row[0], row[1] = row[0], idx_to_class[row[1]]
+            writer.writerow(row)
