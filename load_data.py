@@ -57,7 +57,7 @@ class TransformsAugments():
         mixup = tfv2.MixUp(alpha=mix_factor, num_classes=100)
         self.cutmix_or_mixup = tfv2.RandomChoice([cutmix, mixup])
 
-    def get_transforms(self, resize, magnitude, color_jitter_factor=0.2, degrees_rotation=15, mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)):
+    def get_transforms(self, resize, magnitude, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
         return tfv2.Compose([
                     # Augmentations
                     tfv2.RandAugment(num_ops=2, magnitude=magnitude, interpolation=tfv2.InterpolationMode.BICUBIC), # random augmentation
