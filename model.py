@@ -3,9 +3,9 @@ import torch.nn as nn
 from torchvision import models
 
 # Model Building
-class ENetV2STN(nn.Module):
+class ENetV2(nn.Module):
     def __init__(self, num_classes=100, dpr=0.5):
-        super(ENetV2STN, self).__init__()
+        super(ENetV2, self).__init__()
 
         # Spatial transformer localization-network, from pytorch tutorials
         self.localization = nn.Sequential(

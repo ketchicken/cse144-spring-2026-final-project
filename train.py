@@ -34,8 +34,8 @@ class Trainer():
         total_loss = 0.0
 
         for data, label in loader:
-            # Applying Cutmix/Mixup 90% of the time
-            if torch.rand(1).item() > 0.9:
+            # Applying Cutmix/Mixup 50% of the time
+            if torch.rand(1).item() > 0.5:
                 data, label = self.transformer.cutmix_or_mixup(data, label)
 
             # Train loop
@@ -118,8 +118,15 @@ class Trainer():
         results = []
         best_val_acc = last_acc
         no_improvement = 0
+        frozen_params = list(filter(lambda p: not p.requires_grad, model.parameters()))
 
         for epoch in range(starting_epoch, starting_epoch + num_epochs):
+            if epoch %2 == 0: # Every 2 epochs, unfreeze a feature layer
+                frozen_params[-1].requires_grad = True
+                new_param = frozen_params.pop(-1)
+
+            # Update optimizer + learning rate for the layer
+            self.optimizer.add_param_group({'params':new_param, 'lr':learning_rate*0.4}) # reduce learning rate every step
 
             train_loss, train_acc = self.run_one_epoch(loader=train_loader, model=model, epoch=epoch)
             val_loss, val_acc = self.validate(loader=val_loader,model=model)
@@ -153,3 +160,4 @@ class Trainer():
             writer.writeheader()
             writer.writerows(results)
         return best_val_acc
+    

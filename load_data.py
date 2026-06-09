@@ -57,16 +57,13 @@ class TransformsAugments():
         mixup = tfv2.MixUp(alpha=mix_factor, num_classes=100)
         self.cutmix_or_mixup = tfv2.RandomChoice([cutmix, mixup])
 
-    def get_transforms(self, resize, magnitude, color_jitter_factor=0.2, degrees_rotation=15, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
+    def get_transforms(self, resize, magnitude, color_jitter_factor=0.2, degrees_rotation=15, mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)):
         return tfv2.Compose([
                     # Augmentations
-                    tfv2.RandAugment(num_ops=2, magnitude=magnitude, interpolation=tfv2.InterpolationMode.BILINEAR), # random augmentation
-                    tfv2.RandomErasing(), 
-                    tfv2.RandomRotation(degrees_rotation), # 15 degree rotation
-                    tfv2.ColorJitter(brightness=color_jitter_factor, contrast=color_jitter_factor), # adjust brightness and contrast
+                    tfv2.RandAugment(num_ops=2, magnitude=magnitude, interpolation=tfv2.InterpolationMode.BICUBIC), # random augmentation
 
                     # Normalization
-                    tfv2.Resize((resize,resize), interpolation=tfv2.InterpolationMode.BILINEAR),
+                    tfv2.Resize((resize,resize), interpolation=tfv2.InterpolationMode.BICUBIC),
                     tfv2.CenterCrop((resize,resize)),
                     tfv2.ToImage(),
                     tfv2.ToDtype(torch.float32, scale=True),
