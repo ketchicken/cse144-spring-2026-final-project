@@ -1,10 +1,10 @@
 # cse144-spring-2026-final-project
 
 ## Training 
-Open efficientnetv2l_training.ipynb in Google Colab and run all cells. Make sure to change paths of checkpoints, output, and data where necessary.
+Open efficientnetv2l_training.ipynb in Google Colab and make sure to change paths of checkpoints, output, and data where necessary. Follow the instructions written in the notebook.
 
 ## Testing
-Open evaluate.ipynb in Google Colab and run all cells. The output file will be called "corrected_submission.csv", unless modified. 
+Open evaluate.ipynb in Google Colab and make sure to change the paths where necessary. Follow the instructions written in the notebook.
 
 ## Trained Model Weights:
 https://drive.google.com/drive/folders/1S9xpzN47VjDtEGPy7neq6yprd0cdDg6G?usp=sharing
