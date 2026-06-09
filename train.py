@@ -118,15 +118,6 @@ class Trainer():
         results = []
         best_val_acc = last_acc
         no_improvement = 0
-        # Unfreeze entire feature extraction
-        for param in model.base_model.features.parameters():
-            param.require_gradient=True
-        # update optimizer with new parameters
-        self.optimizer.add_param_group({'params': model.base_model.features.parameters(), 'lr': learning_rate})
-
-        # Update transforms for dataset:
-        train_data.transform =  transformer.get_transforms(resize=384, magnitude=12)
-        train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
 
         for epoch in range(starting_epoch, starting_epoch + num_epochs):
 
